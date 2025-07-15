@@ -4,7 +4,7 @@ import UserTable from './components/UserTable';
 function App() {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>User Directory</h1>
+      <h1><center>User Table Application </center></h1>
       <UserTable />
     </div>
   );
