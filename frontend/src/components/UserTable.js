@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// UserTable component fetches and displays user data with pagination and search
 const UserTable = () => {
+  // State to store fetched users
   const [users, setUsers] = useState([]);
+  // State to store total number of users (for pagination)
   const [total, setTotal] = useState(0);
+  // Current page number
   const [page, setPage] = useState(1);
+  // Search query for filtering users by name
   const [search, setSearch] = useState('');
+  // Number of users per page
   const limit = 20;
 
   useEffect(() => {
     fetchUsers();
   }, [page, search]);
 
+  // Function to fetch users from backend API
   const fetchUsers = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/users`, {
@@ -23,10 +30,10 @@ const UserTable = () => {
       console.error('Failed to fetch users:', err);
     }
   };
-
+    // Calculate total number of pages
   const totalPages = Math.ceil(total / limit);
 
-  // Calculate visible page range
+  //generating pagination buttons(prev, next)
   const visiblePages = [];
   const startPage = Math.max(1, page - 2);
   const endPage = Math.min(totalPages, page + 2);
@@ -36,66 +43,61 @@ const UserTable = () => {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h2>User Table</h2>
-
+      {/* Search input */}
       <input
         placeholder="Search by name"
-        style={{ padding: '8px', marginBottom: '10px', width: '100%', maxWidth: '300px' }}
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
-          setPage(1); // reset to first page on new search
+          setPage(1);
+        }}
+        style={{
+          padding: '8px',
+          marginBottom: '15px',
+          border: '1px solid gray',
+          borderRadius: '4px',
         }}
       />
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-        <thead>
+      {/* User data table */}
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead style={{ backgroundColor: 'lightgray' }}>
           <tr>
             <th style={cellStyle}>Name</th>
             <th style={cellStyle}>Email</th>
           </tr>
         </thead>
         <tbody>
-          {!users || users.length === 0 ? (
-            <tr>
-              <td colSpan="2" style={{ textAlign: 'center', padding: '20px' }}>
-                No users found.
-              </td>
+          {users.map(user => (
+            <tr key={user._id}>
+              <td style={cellStyle}>{user.name}</td>
+              <td style={cellStyle}>{user.email}</td>
             </tr>
-          ) : (
-            users.map(user => (
-              <tr key={user._id}>
-                <td style={cellStyle}>{user.name}</td>
-                <td style={cellStyle}>{user.email}</td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
 
-      {/* Pagination */}
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+      {/* Pagination buttons */}
+      <div style={{ marginTop: '15px' }}>
         <button
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          disabled={page === 1}
+          onClick={() => setPage(Math.max(1, page - 1))}
           style={buttonStyle(false)}
         >
           « Prev
         </button>
 
-        {visiblePages.map((p) => (
+        {visiblePages.map(p => (
           <button
             key={p}
-            style={buttonStyle(p === page)}
             onClick={() => setPage(p)}
+            style={buttonStyle(p === page)}
           >
             {p}
           </button>
         ))}
 
         <button
-          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={page === totalPages}
+          onClick={() => setPage(Math.min(totalPages, page + 1))}
           style={buttonStyle(false)}
         >
           Next »
@@ -105,17 +107,20 @@ const UserTable = () => {
   );
 };
 
+// table cell styling
 const cellStyle = {
-  border: '1px solid #ccc',
-  padding: '8px',
+  border: '1px solid gray',
+  padding: '10px',
+  backgroundColor: 'white',
 };
 
+// Pagination button styling
 const buttonStyle = (active) => ({
   padding: '6px 12px',
-  margin: '0 5px',
-  backgroundColor: active ? '#007bff' : '#eee',
-  color: active ? '#fff' : '#000',
-  border: 'none',
+  marginRight: '5px',
+  backgroundColor: active ? 'skyblue' : 'lightgray',
+  color: active ? 'black' : 'black',
+  border: '1px solid gray',
   borderRadius: '4px',
   cursor: 'pointer',
 });
